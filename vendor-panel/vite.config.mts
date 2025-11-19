@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
   const TALK_JS_APP_ID = env.VITE_TALK_JS_APP_ID || ""
   const DISABLE_SELLERS_REGISTRATION =
     env.VITE_DISABLE_SELLERS_REGISTRATION || "false"
+  const PUBLIC_BASE_URL = env.VITE_PUBLIC_BASE_URL || ""
 
   /**
    * Add this to your .env file to specify the project to load admin extensions from.
@@ -44,6 +45,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: parseInt(process.env.PORT || '5173'),
       open: false,
+      allowedHosts: PUBLIC_BASE_URL ? [PUBLIC_BASE_URL.replace('https://', '').replace('http://', '').split('/')[0]] : [],
     },
     optimizeDeps: {
       entries: [],
