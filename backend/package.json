@@ -15,7 +15,8 @@
   "scripts": {
     "build": "medusa build",
     "ib": "init-backend",
-    "start": "init-backend && cd .medusa/server && medusa start",
+    "init-algolia": "node .medusa/server/src/scripts/init-algolia.js",
+    "start": "init-backend && pnpm run init-algolia && cd .medusa/server && medusa start",
     "dev": "medusa develop",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
