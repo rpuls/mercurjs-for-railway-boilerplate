@@ -4,10 +4,15 @@ import { algoliasearch } from "algoliasearch";
 import * as path from "path";
 import * as fs from "fs";
 
+// Add debugging to see if this file is even loaded
+console.log("[ALGOLIA LOADER] File is being loaded");
+
 export default async function algoliaInitLoader({
   container,
 }: LoaderOptions): Promise<void> {
+  console.log("[ALGOLIA LOADER] Function is being executed");
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  logger.info("[ALGOLIA LOADER] Starting Algolia initialization");
   const algoliaApiKey = process.env.ALGOLIA_API_KEY;
   const algoliaAppId = process.env.ALGOLIA_APP_ID;
 
