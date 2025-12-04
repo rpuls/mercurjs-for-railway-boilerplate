@@ -1,8 +1,29 @@
-# MercurJS Marketplace - Local Development Setup
+<h2 align="center">
+  MercurJS Multi Vendor Marketplace
+</h2>
+<h4 align="center">
+  Backend + Owner/Admin dashbord + Vendor dashboard + Marketplace Storefront + postgres + redis + MinIO
+</h4>
 
-A complete MercurJS marketplace platform with backend, admin panel, and storefront.
+<p align="center">
+  <a href="https://www.mercurjs.com/">
+    <picture>
+      <img alt="MercurJS Interfaces Stacked" src="https://res.cloudinary.com/hczpmiapo/image/upload/v1764888304/Static%20assets/graphics/MercurJS/mercur_interfaces_stacked_z1jrdg.avif">
+    </picture>
+  </a>
+</p>
 
-## 📋 Prerequisites
+
+## 🚀 Quick Start
+
+## Deploy with no manual setup in minutes
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/mercurjs?referralCode=-Yg50p)
+
+### Any questinos about MercurJS on Railway? Ask here: https://station.railway.com/templates/mercurjs-10ceb1ef
+
+## 🖥️ Local Setup
+
+### 📋 Prerequisites
 
 Before starting, ensure you have the following installed:
 
@@ -10,7 +31,7 @@ Before starting, ensure you have the following installed:
 - **PostgreSQL 14+** (Running locally on port 5432)
 - **pnpm** (Package manager)
 
-## 🗂️ Project Structure
+### 🗂️ Project Structure
 
 ```
 mercurjs-for-railway-boilerplate/
@@ -19,8 +40,6 @@ mercurjs-for-railway-boilerplate/
 ├── vendor-panel/     # Vendor/seller dashboard (React/Vite)
 └── storefront/       # Customer-facing storefront (Next.js)
 ```
-
-## 🚀 Quick Start
 
 ### 1. Install Dependencies
 
