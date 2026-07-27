@@ -24,33 +24,29 @@
     "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit"
   },
   "dependencies": {
-    "@medusajs/admin-sdk": "2.10.2",
-    "@medusajs/cli": "2.10.2",
-    "@medusajs/framework": "2.10.2",
-    "@medusajs/medusa": "2.10.2",
-    "@mercurjs/algolia": "^1.4.3",
-    "@mercurjs/b2c-core": "^1.4.3",
-    "@mercurjs/commission": "^1.4.3",
-    "@mercurjs/framework": "^1.4.3",
-    "@mercurjs/payment-stripe-connect": "^1.4.3",
-    "@mercurjs/requests": "^1.4.3",
-    "@mercurjs/resend": "^1.4.3",
-    "@mercurjs/reviews": "^1.4.3",
-    "@mikro-orm/core": "6.4.3",
-    "@mikro-orm/knex": "6.4.3",
-    "@mikro-orm/migrations": "6.4.3",
-    "@mikro-orm/postgresql": "6.4.3",
+    "@medusajs/admin-sdk": "2.11.3",
+    "@medusajs/cli": "2.11.3",
+    "@medusajs/framework": "2.11.3",
+    "@medusajs/index": "2.11.3",
+    "@medusajs/medusa": "2.11.3",
+    "@mercurjs/algolia": "1.5.3",
+    "@mercurjs/b2c-core": "1.5.3",
+    "@mercurjs/commission": "1.5.3",
+    "@mercurjs/framework": "1.5.3",
+    "@mercurjs/payment-stripe-connect": "1.5.3",
+    "@mercurjs/requests": "1.5.3",
+    "@mercurjs/resend": "1.5.3",
+    "@mercurjs/reviews": "1.5.3",
     "algoliasearch": "^5.44.0",
     "awilix": "^8.0.1",
     "medusajs-launch-utils": "^0.0.18",
-    "minio": "^8.0.3",
     "pg": "^8.13.0",
+    "stripe": "^17.4.0",
     "ulid": "^2.3.0"
   },
   "devDependencies": {
-    "@medusajs/test-utils": "2.10.2",
-    "@mikro-orm/cli": "6.4.3",
-    "@swc/core": "1.5.7",
+    "@medusajs/test-utils": "2.11.3",
+    "@swc/core": "^1.7.28",
     "@swc/jest": "^0.2.36",
     "@types/jest": "^29.5.13",
     "@types/node": "^20.0.0",
@@ -67,5 +63,6 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "packageManager": "pnpm@10.32.1"
 }

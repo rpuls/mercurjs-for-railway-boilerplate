@@ -1,11 +1,22 @@
 
 import { defineConfig, loadEnv } from '@medusajs/framework/utils'
+import { resolveStorageConfig } from './src/config/storage'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+const storage = resolveStorageConfig()
 
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    ...(process.env.NODE_ENV === 'production' ? {
+      databaseDriverOptions: {
+        connection: {
+          ssl: process.env.DATABASE_SSL === 'false'
+            ? false
+            : { rejectUnauthorized: false }
+        }
+      }
+    } : {}),
     ...(process.env.REDIS_URL ? { redisUrl: process.env.REDIS_URL } : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
@@ -54,15 +65,10 @@ module.exports = defineConfig({
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [
-          ...(process.env.MINIO_ENDPOINT && process.env.MINIO_ACCESS_KEY && process.env.MINIO_SECRET_KEY ? [{
-            resolve: './src/modules/minio-file',
-            id: 'minio',
-            options: {
-              endPoint: process.env.MINIO_ENDPOINT,
-              accessKey: process.env.MINIO_ACCESS_KEY,
-              secretKey: process.env.MINIO_SECRET_KEY,
-              bucket: process.env.MINIO_BUCKET // Optional, defaults to 'medusa-media'
-            }
+          ...(storage.kind === 's3' ? [{
+            resolve: '@medusajs/medusa/file-s3',
+            id: 's3',
+            options: storage.options
           }] : [{
             resolve: '@medusajs/medusa/file-local',
             id: 'local',
@@ -90,6 +96,9 @@ module.exports = defineConfig({
         }
       }
     ] : []),
+    {
+      resolve: '@medusajs/index'
+    },
     ...(process.env.STRIPE_SECRET_API_KEY && process.env.STRIPE_WEBHOOK_SECRET ? [{
       resolve: '@medusajs/medusa/payment',
       options: {

@@ -2,7 +2,7 @@
   MercurJS Multi Vendor Marketplace
 </h2>
 <h4 align="center">
-  Backend + Owner/Admin dashbord + Vendor dashboard + Marketplace Storefront + postgres + redis + MinIO
+  Backend + Owner/Admin dashboard + Vendor dashboard + Marketplace Storefront + PostgreSQL + Redis + Railway Bucket
 </h4>
 
 <p align="center">
@@ -198,17 +198,124 @@ VITE_MEDUSA_STOREFRONT_URL=http://localhost:3000
 
 ## 💾 File Storage
 
-**Railway Deployment:** When deploying to Railway using the deploy button, MinIO object storage is fully configured and ready to use. All file uploads (product images, etc.) are automatically stored in a MinIO bucket.
+New Railway installations use a private Railway Bucket through Medusa's stock
+S3 file provider. Browsers retrieve media through a small read-only Railway
+Function named `Bucket-proxy`.
 
-**Local Development:** The project automatically falls back to disk storage (files are saved in the `backend/static` folder) for easy local setup - no additional configuration needed.
-
-To manually configure MinIO for local development, add these variables to `backend/.env`:
+Wire the Backend service exactly as follows (Railway references are
+case-sensitive):
 
 ```env
-MINIO_ENDPOINT=your-minio-endpoint.com
-MINIO_ACCESS_KEY=your-access-key
-MINIO_SECRET_KEY=your-secret-key
-MINIO_BUCKET=custom-bucket-name  # Optional, defaults to 'medusa-media'
+S3_ACCESS_KEY_ID=${{Bucket.ACCESS_KEY_ID}}
+S3_SECRET_ACCESS_KEY=${{Bucket.SECRET_ACCESS_KEY}}
+S3_BUCKET=${{Bucket.BUCKET}}
+S3_ENDPOINT=${{Bucket.ENDPOINT}}
+S3_REGION=${{Bucket.REGION}}
+S3_FILE_URL=https://${{Bucket-proxy.RAILWAY_PUBLIC_DOMAIN}}
+S3_ACL=false
+```
+
+Create `Bucket-proxy` as a Railway Function, give it the same five Bucket
+credential variables, and paste this source:
+
+```ts
+import { S3Client } from "bun";
+
+const CACHE_CONTROL =
+  Bun.env.CACHE_CONTROL || "public, max-age=31536000, immutable";
+const s3 = new S3Client({
+  virtualHostedStyle: Bun.env.S3_VIRTUAL_HOSTED_STYLE !== "false",
+});
+
+export default {
+  async fetch(req: Request): Promise<Response> {
+    const url = new URL(req.url);
+
+    if (url.pathname === "/health") {
+      return new Response('{"status":"ok"}', {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      return new Response("Method Not Allowed", {
+        status: 405,
+        headers: { Allow: "GET, HEAD" },
+      });
+    }
+
+    let key: string;
+    try {
+      key = decodeURIComponent(url.pathname.slice(1));
+    } catch {
+      return new Response("Not Found", { status: 404 });
+    }
+
+    if (!key || key.includes("\0")) {
+      return new Response("Not Found", { status: 404 });
+    }
+
+    try {
+      const file = s3.file(key);
+      const stat = await file.stat();
+      const headers: Record<string, string> = {
+        "Content-Type": stat.type || "application/octet-stream",
+        "Content-Length": String(stat.size),
+        "Cache-Control": CACHE_CONTROL,
+      };
+
+      return req.method === "HEAD"
+        ? new Response(null, { headers })
+        : new Response(file.stream(), { headers });
+    } catch {
+      return new Response("Not Found", { status: 404 });
+    }
+  },
+};
+```
+
+```env
+S3_BUCKET=${{Bucket.BUCKET}}
+S3_REGION=${{Bucket.REGION}}
+S3_ENDPOINT=${{Bucket.ENDPOINT}}
+S3_ACCESS_KEY_ID=${{Bucket.ACCESS_KEY_ID}}
+S3_SECRET_ACCESS_KEY=${{Bucket.SECRET_ACCESS_KEY}}
+S3_VIRTUAL_HOSTED_STYLE=true
+```
+
+Generate its public domain, then set the Storefront variable:
+
+```env
+NEXT_PUBLIC_MEDIA_HOSTNAME=${{Bucket-proxy.RAILWAY_PUBLIC_DOMAIN}}
+```
+
+Do not set `S3_FORCE_PATH_STYLE` for Railway Bucket. The local Compose
+environment sets it because MinIO is used there strictly as an S3 emulator.
+For local development only, Compose makes the emulator bucket publicly
+downloadable so it does not need to reproduce Railway Functions.
+New Railway Buckets use virtual-hosted-style URLs. For an older Bucket whose
+Credentials tab explicitly says it requires path-style URLs, set the Function's
+`S3_VIRTUAL_HOSTED_STYLE=false`.
+Production startup rejects missing, partial, mixed, or malformed storage
+configuration instead of falling back to ephemeral disk. Do not add anonymous
+`PUT` or `DELETE` handlers to the public Function: the Backend already performs
+authenticated writes directly against `S3_ENDPOINT`.
+
+Existing MinIO deployments may temporarily retain a complete
+`MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, and optional
+`MINIO_BUCKET` contract. Never mix those variables with any `S3_*` variable.
+Existing media URLs stored in PostgreSQL are not rewritten; retain the old
+MinIO endpoint while migrating objects/records, or re-upload affected media.
+
+This template is intended for new deployments. Updating an existing production
+installation is not a straightforward in-place upgrade. Keep the existing
+stack running and read [UPGRADE.md](./UPGRADE.md) before considering a parallel,
+manually validated migration.
+
+For deterministic local infrastructure:
+
+```bash
+docker compose up --build
 ```
 
 ## 🔧 Troubleshooting
