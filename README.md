@@ -175,6 +175,12 @@ JWT_SECRET=supersecret
 COOKIE_SECRET=supersecret
 ```
 
+Stripe is optional. Without both `STRIPE_SECRET_API_KEY` and
+`STRIPE_WEBHOOK_SECRET`, the template uses Medusa's manual payment provider so
+the demo can launch without a Stripe account. Providing both enables Stripe
+checkout. `STRIPE_CONNECTED_ACCOUNTS_WEBHOOK_SECRET` is the separate Stripe
+Connect webhook signing secret used for seller payout accounts.
+
 ### Storefront Configuration
 
 ```env

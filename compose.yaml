@@ -68,7 +68,6 @@ services:
       COOKIE_SECRET: local-only-cookie-secret
       MEDUSA_ADMIN_EMAIL: admin@local.test
       MEDUSA_ADMIN_PASSWORD: local-admin-password
-      STRIPE_SECRET_API_KEY: sk_test_dummy
       BACKEND_URL: http://localhost:9000
       S3_FILE_URL: http://localhost:9001/medusa-media
       S3_ACCESS_KEY_ID: minioadmin

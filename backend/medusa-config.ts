@@ -4,6 +4,16 @@ import { resolveStorageConfig } from './src/config/storage'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 const storage = resolveStorageConfig()
+const stripeSecretKey = process.env.STRIPE_SECRET_API_KEY?.trim()
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim()
+const stripePaymentsEnabled = Boolean(stripeSecretKey && stripeWebhookSecret)
+
+// Mercur 1.5.3 constructs its Stripe payout client even when Stripe is not
+// configured. A non-secret placeholder keeps the demo bootable; payout calls
+// still fail closed at Stripe until the user supplies a real key.
+if (!stripeSecretKey) {
+  process.env.STRIPE_SECRET_API_KEY = "sk_test_mercur_demo_stripe_not_configured"
+}
 
 module.exports = defineConfig({
   projectConfig: {
@@ -99,22 +109,26 @@ module.exports = defineConfig({
     {
       resolve: '@medusajs/index'
     },
-    ...(process.env.STRIPE_SECRET_API_KEY && process.env.STRIPE_WEBHOOK_SECRET ? [{
+    {
       resolve: '@medusajs/medusa/payment',
       options: {
         providers: [
-          {
+          ...(stripePaymentsEnabled ? [{
             resolve:
               '@mercurjs/payment-stripe-connect/providers/stripe-connect',
             id: 'stripe-connect',
             options: {
-              apiKey: process.env.STRIPE_SECRET_API_KEY,
-              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
+              apiKey: stripeSecretKey,
+              webhookSecret: stripeWebhookSecret
             }
-          }
+          }] : [{
+            resolve: '@medusajs/medusa/payment-manual',
+            id: 'manual',
+            options: {}
+          }])
         ]
       }
-    }] : []),
+    },
     {
       resolve: '@medusajs/medusa/notification',
       options: {
