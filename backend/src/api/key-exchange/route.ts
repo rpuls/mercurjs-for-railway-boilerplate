@@ -12,7 +12,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         ['Webshop', 'Default Publishable API Key', 'Default publishable key'].includes(apiKey.title)
       ) ?? publishableKeys[0];
     if (!defaultApiKey) {
-      res.json({});
+      res.status(503).json({
+        error: 'Publishable API key is not initialized. Restart the backend to run the startup repair.'
+      });
     } else {
       res.json({ publishableApiKey: defaultApiKey.token });
     }

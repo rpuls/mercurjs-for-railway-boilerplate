@@ -18,6 +18,10 @@
 - The backend launcher is supplied by `medusajs-launch-utils`. When it masks a
   failure, run its child migration/seed/admin commands directly to preserve
   stdout and stderr.
+- `medusajs-launch-utils` considers the database seeded when the `user` table
+  merely exists, which can leave partially initialized deployments without a
+  publishable API key. Backend startup always runs the idempotent
+  `ensure-publishable-key` script after `init-backend`; do not remove it.
 - Mercur 1.5.3's core payout module constructs Stripe unconditionally. When no
   real key is configured, `medusa-config.ts` installs an internal non-secret
   placeholder solely to keep the demo bootable and relies on Medusa's built-in
