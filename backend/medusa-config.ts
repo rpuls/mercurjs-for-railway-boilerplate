@@ -121,11 +121,7 @@ module.exports = defineConfig({
               apiKey: stripeSecretKey,
               webhookSecret: stripeWebhookSecret
             }
-          }] : [{
-            resolve: '@medusajs/medusa/payment-manual',
-            id: 'manual',
-            options: {}
-          }])
+          }] : [])
         ]
       }
     },

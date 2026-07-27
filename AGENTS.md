@@ -20,7 +20,8 @@
   stdout and stderr.
 - Mercur 1.5.3's core payout module constructs Stripe unconditionally. When no
   real key is configured, `medusa-config.ts` installs an internal non-secret
-  placeholder solely to keep the demo bootable and selects Medusa's manual
-  payment provider. Never treat that placeholder as functioning Stripe.
+  placeholder solely to keep the demo bootable and relies on Medusa's built-in
+  system payment provider. There is no `@medusajs/medusa/payment-manual` export
+  in Medusa 2.11.3. Never treat the placeholder as functioning Stripe.
   Checkout and connected-account webhooks use separate `STRIPE_WEBHOOK_SECRET`
   and `STRIPE_CONNECTED_ACCOUNTS_WEBHOOK_SECRET` values.
