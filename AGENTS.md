@@ -22,6 +22,10 @@
   merely exists, which can leave partially initialized deployments without a
   publishable API key. Backend startup always runs the idempotent
   `ensure-publishable-key` script after `init-backend`; do not remove it.
+- The upstream `await-backend` binary only reads
+  `NEXT_PUBLIC_MEDUSA_BACKEND_URL`. The vendor app deliberately uses that same
+  variable and loads it explicitly in Vite config; do not rename it to a
+  `VITE_` variable or the Railway readiness check will silently poll localhost.
 - Mercur 1.5.3's core payout module constructs Stripe unconditionally. When no
   real key is configured, `medusa-config.ts` installs an internal non-secret
   placeholder solely to keep the demo bootable and relies on Medusa's built-in
