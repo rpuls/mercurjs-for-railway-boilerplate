@@ -1,11 +1,15 @@
 export default (sp: any) => {
-  const name = sp.shipping_profile.name.includes(":")
-    ? sp.shipping_profile.name.split(":")[1]
-    : sp.shipping_profile.name
+  // Mercur 1.5.3 returns profiles directly, while older vendor endpoints
+  // returned seller-profile links with the profile nested on the relation.
+  const shippingProfile = sp.shipping_profile ?? sp
+  const name = shippingProfile.name.includes(":")
+    ? shippingProfile.name.split(":")[1]
+    : shippingProfile.name
+
   return {
     ...sp,
     shipping_profile: {
-      ...sp.shipping_profile,
+      ...shippingProfile,
       name,
     },
   }
