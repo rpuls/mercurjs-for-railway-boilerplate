@@ -1,11 +1,32 @@
 
 import { defineConfig, loadEnv } from '@medusajs/framework/utils'
+import { resolveStorageConfig } from './src/config/storage'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+const storage = resolveStorageConfig()
+const stripeSecretKey = process.env.STRIPE_SECRET_API_KEY?.trim()
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim()
+const stripePaymentsEnabled = Boolean(stripeSecretKey && stripeWebhookSecret)
+
+// Mercur 1.5.3 constructs its Stripe payout client even when Stripe is not
+// configured. A non-secret placeholder keeps the demo bootable; payout calls
+// still fail closed at Stripe until the user supplies a real key.
+if (!stripeSecretKey) {
+  process.env.STRIPE_SECRET_API_KEY = "sk_test_mercur_demo_stripe_not_configured"
+}
 
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    ...(process.env.NODE_ENV === 'production' ? {
+      databaseDriverOptions: {
+        connection: {
+          ssl: process.env.DATABASE_SSL === 'false'
+            ? false
+            : { rejectUnauthorized: false }
+        }
+      }
+    } : {}),
     ...(process.env.REDIS_URL ? { redisUrl: process.env.REDIS_URL } : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
@@ -54,15 +75,10 @@ module.exports = defineConfig({
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [
-          ...(process.env.MINIO_ENDPOINT && process.env.MINIO_ACCESS_KEY && process.env.MINIO_SECRET_KEY ? [{
-            resolve: './src/modules/minio-file',
-            id: 'minio',
-            options: {
-              endPoint: process.env.MINIO_ENDPOINT,
-              accessKey: process.env.MINIO_ACCESS_KEY,
-              secretKey: process.env.MINIO_SECRET_KEY,
-              bucket: process.env.MINIO_BUCKET // Optional, defaults to 'medusa-media'
-            }
+          ...(storage.kind === 's3' ? [{
+            resolve: '@medusajs/medusa/file-s3',
+            id: 's3',
+            options: storage.options
           }] : [{
             resolve: '@medusajs/medusa/file-local',
             id: 'local',
@@ -90,22 +106,25 @@ module.exports = defineConfig({
         }
       }
     ] : []),
-    ...(process.env.STRIPE_SECRET_API_KEY && process.env.STRIPE_WEBHOOK_SECRET ? [{
+    {
+      resolve: '@medusajs/index'
+    },
+    {
       resolve: '@medusajs/medusa/payment',
       options: {
         providers: [
-          {
+          ...(stripePaymentsEnabled ? [{
             resolve:
               '@mercurjs/payment-stripe-connect/providers/stripe-connect',
             id: 'stripe-connect',
             options: {
-              apiKey: process.env.STRIPE_SECRET_API_KEY,
-              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
+              apiKey: stripeSecretKey,
+              webhookSecret: stripeWebhookSecret
             }
-          }
+          }] : [])
         ]
       }
-    }] : []),
+    },
     {
       resolve: '@medusajs/medusa/notification',
       options: {

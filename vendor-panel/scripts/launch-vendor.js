@@ -2,7 +2,9 @@ const { execSync } = require('child_process');
 const https = require('https');
 const http = require('http');
 
-const BACKEND_URL = process.env.VITE_MEDUSA_BACKEND_URL || 'http://localhost:9000';
+// Keep this non-standard name aligned with medusajs-launch-utils:
+// its await-backend command only reads NEXT_PUBLIC_MEDUSA_BACKEND_URL.
+const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000';
 
 async function fetchPublishableKey() {
   return new Promise((resolve, reject) => {
