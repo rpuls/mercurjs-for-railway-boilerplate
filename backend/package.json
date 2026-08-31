@@ -40,7 +40,7 @@
     "@mercurjs/reviews": "1.5.3",
     "algoliasearch": "^5.44.0",
     "awilix": "^8.0.1",
-    "medusajs-launch-utils": "^0.0.18",
+    "medusajs-launch-utils": "0.1.0",
     "pg": "^8.13.0",
     "stripe": "^17.4.0",
     "ulid": "^2.3.0"
